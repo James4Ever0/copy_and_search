@@ -1,0 +1,9 @@
+def search_by_query():
+    ...
+
+def refresh_index():
+    ...
+
+def read_config():
+    # config load from home directory
+    ...

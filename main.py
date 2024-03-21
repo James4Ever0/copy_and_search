@@ -1,14 +1,8 @@
-def get_clipboard_change():
-    ...
-
-def get_clipboard_source():
-    ...
-
 import wx
 
 class MyFrame(wx.Frame):
     def __init__(self):
-        super().__init__(None, title="Search App", size=(600, 400))
+        super().__init__(None, title="Search App", size=(600, 400), style=wx.STAY_ON_TOP)
 
         self.panel = wx.Panel(self)
 
@@ -38,6 +32,7 @@ class MyFrame(wx.Frame):
         box_sizer.Add(search_box_sizer, flag=wx.EXPAND | wx.ALL, border=10)
 
         self.panel.SetSizer(box_sizer)
+        
 
     def on_submit(self, event):
         # Placeholder for submit button action

@@ -1,7 +1,8 @@
 import time
 import threading
 from fastapi import FastAPI
-
+from config import KEYBOARD_EVENT_PORT, KEYBOARD_EVENT_ENDPOINT, HOST_ADDRESS
+from dataclass import KeyboardEventTimestamp
 # Listen to keyboard events
 from pynput import keyboard
 
@@ -28,11 +29,12 @@ def keyboard_listener():
 app = FastAPI()
 
 # Endpoint to get the latest key event timestamp
-@app.get("/latest_keypress_timestamp")
+# @app.get("/latest_keypress_timestamp")
+@app.get(KEYBOARD_EVENT_ENDPOINT)
 async def get_latest_keypress_timestamp():
-    return {"timestamp": latest_keypress_timestamp}
+    return KeyboardEventTimestamp(timestamp=latest_keypress_timestamp)
 
-if __name__ == "__main__":
+def main():
     
     # Create a keyboard listener in a separate daemon thread
     
@@ -40,4 +42,8 @@ if __name__ == "__main__":
     keyboard_thread.start()
 
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8991)
+    # uvicorn.run(app, host="127.0.0.1", port=8991)
+    uvicorn.run(app, host=HOST_ADDRESS, port=KEYBOARD_EVENT_PORT)
+
+if __name__ == "__main__":
+    main()

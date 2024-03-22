@@ -1,15 +1,19 @@
 import multiprocessing
 import ui
 import sys, os, subprocess
-from config import START_PROCESS_INTERVAL
+from config import START_PROCESS_INTERVAL, CLIPBOARD_EVENT_PORT, KEYBOARD_EVENT_PORT
 import time
+from singleton import ensure_singleton
+from kill import client_kill_server
 
 processes = {}
 
+def start_listeners():
+    start_process(run_keyboard_listener, "keyboard_listener")
+    start_process(run_clipboard_listener, "clipboard_listener")
 
 def run_python_script_as_subprocess(script_path: str):
-    subprocess.run([sys.executable, script_path])
-
+    subprocess.Popen([sys.executable, script_path])
 
 def resolve_script_relative_path(script_relative_path: str):
     basedir = os.path.split(__file__)[0]
@@ -20,8 +24,6 @@ def run_python_script_by_relative_path(script_relative_path:str):
     run_python_script_as_subprocess(script_path)
 
 def run_keyboard_listener():
-    # do not do that. it will not work.
-    #     keyboard.main()
     run_python_script_by_relative_path("keyboard.py")
 
 def run_clipboard_listener():
@@ -32,10 +34,16 @@ def start_process(runner, name: str):
     processes[name] = process
     process.start()
     time.sleep(START_PROCESS_INTERVAL)
+    return process
+
+def cleanup_processes():
+    client_kill_server(CLIPBOARD_EVENT_PORT)
+    client_kill_server(KEYBOARD_EVENT_PORT)
 
 if __name__ == "__main__":
-    start_process(run_keyboard_listener, "keyboard_listener")  # you cannot start it.
-    start_process(run_clipboard_listener, "clipboard_listener")
+    ensure_singleton()
+    start_listeners()
 
-    # keyboard.main()
     ui.ui_main()
+    
+    cleanup_processes()

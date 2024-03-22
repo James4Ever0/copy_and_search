@@ -3,8 +3,8 @@ import fastapi
 import time
 import beartype
 from config import (
-    CLIPBOARD_ENDPOINT,
-    CLIPBOARD_PORT,
+    CLIPBOARD_EVENT_ENDPOINT,
+    CLIPBOARD_EVENT_PORT,
     CLIPBOARD_UPDATE_INTERVAL,
     HOST_ADDRESS,
     KEYBOARD_EVENT_ENDPOINT,
@@ -39,6 +39,12 @@ def update_clipboard_event():
         keyboard_event_timestamp: KeyboardEventTimestamp = session.get(
             f"http://{HOST_ADDRESS}:{KEYBOARD_EVENT_PORT}{KEYBOARD_EVENT_ENDPOINT}"
         ).json()
+        # print("----")
+        # print(clipboard_timestamp)
+        # print(keyboard_event_timestamp["timestamp"])
+        # print(abs(clipboard_timestamp - keyboard_event_timestamp["timestamp"]))
+        # print(CLIPBOARD_SOURCE_AS_KEYBOARD_TIMELIMIT)
+        # print("----")
         if (
             abs(clipboard_timestamp - keyboard_event_timestamp["timestamp"])
             < CLIPBOARD_SOURCE_AS_KEYBOARD_TIMELIMIT
@@ -48,7 +54,7 @@ def update_clipboard_event():
         clipboard["content"] = clipboard_content
         clipboard["timestamp"] = clipboard_timestamp
         clipboard["source"] = clipboard_source
-        print("updated clipboard:", clipboard)
+        print("[clipboard listener]", "updated clipboard:", clipboard)
 
 
 def clipboard_listener():
@@ -72,7 +78,7 @@ def clipboard_listener():
 app = fastapi.FastAPI()
 
 
-@app.get(CLIPBOARD_ENDPOINT)
+@app.get(CLIPBOARD_EVENT_ENDPOINT)
 async def get_clipboard():
     global clipboard
     return clipboard
@@ -84,8 +90,7 @@ def main():
     clipboard_thread = threading.Thread(target=clipboard_listener, daemon=True)
     clipboard_thread.start()
 
-    print("[clipboard listener] starting server")
-    kill_and_run(app, port=CLIPBOARD_PORT)
+    kill_and_run(app, port=CLIPBOARD_EVENT_PORT, application_name='clipboard listener')
 
 
 if __name__ == "__main__":

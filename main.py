@@ -1,16 +1,27 @@
 import multiprocessing
-import subprocess
-import keyboard_event
+import keyboard
+import clipboard
 import ui
 
-def run_event_listener():
-    keyboard_event.main()
+processes = {}
 
-if __name__ == '__main__':
-    processes = {}
-    
-    event_listener_process = multiprocessing.Process(target=run_event_listener, daemon=True)
-    processes['event_listener'] = event_listener_process
-    event_listener_process.start()
-    
+
+def run_keyboard_listener():
+    keyboard.main()
+
+
+def run_clipboard_listener():
+    clipboard.main()
+
+
+def start_process(runner, name: str):
+    process = multiprocessing.Process(target=runner, daemon=True)
+    processes[name] = process
+    process.start()
+
+
+if __name__ == "__main__":
+    start_process(run_keyboard_listener, "keyboard_listener")
+    start_process(run_clipboard_listener, "clipboard_listener")
+
     ui.ui_main()

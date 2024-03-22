@@ -31,7 +31,7 @@ app = FastAPI()
 # Endpoint to get the latest key event timestamp
 # @app.get("/latest_keypress_timestamp")
 @app.get(KEYBOARD_EVENT_ENDPOINT)
-async def get_latest_keypress_timestamp():
+async def get_keyboard():
     return KeyboardEventTimestamp(timestamp=latest_keypress_timestamp)
 
 def main():

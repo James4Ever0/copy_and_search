@@ -5,6 +5,7 @@ from config import KEYBOARD_EVENT_PORT, KEYBOARD_EVENT_ENDPOINT, HOST_ADDRESS
 from dataclass import KeyboardEventTimestamp
 # Listen to keyboard events
 from pynput import keyboard
+from kill import kill_and_run
 
 latest_keypress_timestamp = 0
 
@@ -41,9 +42,9 @@ def main():
     keyboard_thread = threading.Thread(target=keyboard_listener, daemon=True)
     keyboard_thread.start()
 
-    import uvicorn
     # uvicorn.run(app, host="127.0.0.1", port=8991)
-    uvicorn.run(app, host=HOST_ADDRESS, port=KEYBOARD_EVENT_PORT)
+    print("[keyboard listener] starting server")
+    kill_and_run(app, port=KEYBOARD_EVENT_PORT)
 
 if __name__ == "__main__":
     main()

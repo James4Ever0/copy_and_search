@@ -57,6 +57,9 @@ class AppFrame(tk.Tk):
         self.configure(bg="white")
         self.resizable(False, False)
 
+        # Set the window to be always on top
+        self.attributes("-topmost", True)
+
         # Searched Items List
         self.search_list = tk.Listbox(self, selectmode=tk.SINGLE, height=18, width=64)
         self.search_list.grid(column=0, row=0, padx=10, pady=10, sticky="nsew")

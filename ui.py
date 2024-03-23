@@ -107,6 +107,8 @@ class AppFrame(tk.Tk):
         # Placeholder for submit button action
         # get textbox content.
         query = self.search_text.get()
+        # let's just override the clipboard.
+        copy_to_clipboard(query)
         self.perform_search(query)
 
     def on_refresh(self):

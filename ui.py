@@ -87,6 +87,7 @@ class AppFrame(tk.Tk):
             self.button_frame, text="Search", command=self.on_submit
         )
         self.submit_button.pack(side=tk.RIGHT, padx=5, pady=5)
+        self.is_running = True
 
     def perform_search(self, query: str):
         if query:  # non-empty query
@@ -95,6 +96,7 @@ class AppFrame(tk.Tk):
                 print("[ui]", "searching:", query)
                 items = search_by_query(query)
                 self.update_search_list_by_items(items)
+                return True
 
     # listen to clipboard.
 
@@ -111,16 +113,33 @@ class AppFrame(tk.Tk):
 
 
 def monitor_clipboard_and_perform_search(frame: AppFrame):
-    while True:
-        time.sleep(MONITOR_CLIPBOARD_PERIOD)
-        resp = session.get(
-            f"http://{HOST_ADDRESS}:{CLIPBOARD_EVENT_ENDPOINT}{CLIPBOARD_EVENT_PORT}"
-        )
+    def main_loop():
+        url = f"http://{HOST_ADDRESS}:{CLIPBOARD_EVENT_PORT}{CLIPBOARD_EVENT_ENDPOINT}"
+        while True:
+            time.sleep(MONITOR_CLIPBOARD_PERIOD)
+            if getattr(frame, "is_running", False) is not True:
+                print("[ui] main frame is not running.")
+                continue
+            inner_loop(url)
+
+    def inner_loop(url: str):
+        resp = session.get(url, timeout=MONITOR_CLIPBOARD_TIMEOUT)
         if resp.status_code == http.HTTPStatus.OK:
             data = resp.json()
             data = ClipboardEvent(**data)
             if data["source"] in APP_CONFIG["event_sources"]:
-                frame.perform_search(data["content"])
+                clipboard_content = data["content"]
+                is_searched = frame.perform_search(clipboard_content)
+                if is_searched:
+                    print("[ui]", "performing clipboard search:", clipboard_content)
+        else:
+            if resp.status_code == http.HTTPStatus.BAD_GATEWAY:
+                print("[ui]", "clipboard server is not running")
+            else:
+                print("[ui]", "abnormal clipboard server status code:", resp.status_code)
+            print("[ui]", "abnormal request at:", url)
+
+    main_loop()
 
 
 def start_daemon_thread(target: Callable, args=(), kwargs={}):
@@ -130,7 +149,9 @@ def start_daemon_thread(target: Callable, args=(), kwargs={}):
 
 def ui_main():
     frame = AppFrame()
-    start_daemon_thread(monitor_clipboard_and_perform_search)
+    # start_daemon_thread(frame.mainloop)
+    # monitor_clipboard_and_perform_search(frame)
+    start_daemon_thread(monitor_clipboard_and_perform_search, args=(frame,))
     frame.mainloop()
 
 

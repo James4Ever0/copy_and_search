@@ -10,7 +10,7 @@ from config import APP_CONFIG, SEARCH_LIMIT
 import shutil
 
 def get_or_create_index():
-    index_path = APP_CONFIG["index_path"]
+    index_path = APP_CONFIG["index_directory"]
     analyser = ChineseAnalyzer()
     schema = Schema(
         title=TEXT(stored=True, analyzer=analyser),
@@ -33,7 +33,7 @@ SEARCH_INDEX = get_or_create_index()
 def remove_and_create_index():
     global SEARCH_INDEX
     SEARCH_INDEX.close()
-    index_path = APP_CONFIG["index_path"]
+    index_path = APP_CONFIG["index_directory"]
     if os.path.exists(index_path):
         shutil.rmtree(index_path)
     SEARCH_INDEX = get_or_create_index()
@@ -67,12 +67,12 @@ def search_by_query(query: str):
     return ret
 
 
-def add_document_by_file_relpath_and_line_content(
-    writer: SegmentWriter, file_relpath: str, line_content: str
+def add_document_by_file_relpath_and_line_content(file_relpath: str, line_content: str
 ):
     line_content = line_content.strip()
     if line_content:
         # 使用add_document向索引内添加内容
+        writer: SegmentWriter = SEARCH_INDEX.writer()
         writer.add_document(title=file_relpath, content=line_content)
         # 提交
         writer.commit()
@@ -84,15 +84,16 @@ def refresh_index():
     document_directory = APP_CONFIG["document_directory"]
     # recursively walk over directory and index all files
 
-    writer: SegmentWriter = SEARCH_INDEX.writer()
 
     for dirpath, _, filenames in os.walk(document_directory):
         for filename in filenames:
             file_relpath = os.path.join(dirpath, filename)
             file_abspath = os.path.join(document_directory, filename)
             if file_relpath.split(".")[-1] == "txt":
+                print(f"[search] processing file: {file_abspath}")
                 with open(file_abspath, "r") as f:
                     for line_content in f.readlines():
-                        add_document_by_file_relpath_and_line_content(
-                            writer, file_relpath, line_content
+                        add_document_by_file_relpath_and_line_content(file_relpath, line_content
                         )
+            else:
+                print(f"[search] skipping file: {file_abspath}")

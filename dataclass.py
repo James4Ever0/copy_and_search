@@ -6,6 +6,7 @@ EventSource: TypeAlias = Literal["keyboard", "mouse"]
 
 class AppConfig(TypedDict):
     index_directory: str
+    document_directory: str
     event_sources: List[EventSource]
 
 

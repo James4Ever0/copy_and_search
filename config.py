@@ -1,5 +1,6 @@
 from dataclass import AppConfig
 import os
+import json
 
 HOST_ADDRESS = "127.0.0.1"
 
@@ -21,19 +22,40 @@ START_PROCESS_INTERVAL = 1
 
 APP_DEFAULT_CONFIG_BASEPATH = os.path.join(os.path.expanduser("~"), ".copy_and_search")
 
-if os.path.exists(APP_DEFAULT_CONFIG_BASEPATH):
-    if not os.path.isdir(APP_DEFAULT_CONFIG_BASEPATH):
-        raise Exception(f"Path '{APP_DEFAULT_CONFIG_BASEPATH}' is not a directory")
-else:
-    os.mkdir(APP_DEFAULT_CONFIG_BASEPATH)
+
+def make_sure_directory_exists(directory: str):
+    if os.path.exists(directory):
+        if not os.path.isdir(directory):
+            raise Exception(f"Path '{directory}' is not a directory")
+    else:
+        os.mkdir(directory)
 
 APP_CONFIG_PATH = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "config.json")
 APP_DEFAULT_INDEX_DIRECTORY = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "index")
+APP_DEFAULT_DOCUMENT_DIRECTORY = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "document")
 APP_DEFAULT_EVENT_SOURCES = ["keyboard"]
 
+make_sure_directory_exists(APP_DEFAULT_CONFIG_BASEPATH)
+make_sure_directory_exists(APP_DEFAULT_DOCUMENT_DIRECTORY)
+
 APP_DEFAULT_CONFIG = AppConfig(
-    index_directory=APP_DEFAULT_INDEX_DIRECTORY, event_sources=APP_DEFAULT_EVENT_SOURCES
+    index_directory=APP_DEFAULT_INDEX_DIRECTORY,
+    document_directory=APP_DEFAULT_DOCUMENT_DIRECTORY,
+    event_sources=APP_DEFAULT_EVENT_SOURCES,
 )
+
+if os.path.exists(APP_CONFIG_PATH):
+    with open(APP_CONFIG_PATH, "r") as f:
+        APP_CONFIG = AppConfig(**json.load(f))
+else:
+    with open(APP_CONFIG_PATH, "w+") as f:
+        json.dump(APP_DEFAULT_CONFIG, f)
+    APP_CONFIG = APP_DEFAULT_CONFIG
 
 SINGLETON_FILELOCK = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "singleton.lock")
 SINGLETON_TIMEOUT = 2
+
+SEARCH_LIMIT = 10
+
+MONITOR_CLIPBOARD_PERIOD=1
+MONITOR_CLIPBOARD_TIMEOUT=2

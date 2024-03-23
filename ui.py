@@ -114,7 +114,7 @@ class AppFrame(tk.Tk):
     def on_refresh(self):
         # Placeholder for refresh button action
         refresh_index()
-        messagebox.showinfo("Refresh", "Index refreshed.")
+        messagebox.showinfo("Refresh", "Index refreshed.", parent=self)
 
 
 def monitor_clipboard_and_perform_search(frame: AppFrame):

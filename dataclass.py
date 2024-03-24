@@ -8,6 +8,7 @@ class AppConfig(TypedDict):
     index_directory: str
     document_directory: str
     event_sources: List[EventSource]
+    search_limit:int
 
 
 class ClipboardEvent(TypedDict):
@@ -18,6 +19,8 @@ class ClipboardEvent(TypedDict):
 class KeyboardEventTimestamp(TypedDict):
     timestamp: float
 
+class MouseEventTimestamp(TypedDict):
+    timestamp: float
 
 # data format:
 # {"content": <copied text content>, "timestamp": <timestamp since copied>, "source": <keyboard or mouse>}

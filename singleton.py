@@ -5,6 +5,6 @@ class SingletonError(Exception):...
 
 def ensure_singleton():
     try:
-        filelock.FileLock(SINGLETON_FILELOCK, timeout=SINGLETON_TIMEOUT)
+        return filelock.FileLock(SINGLETON_FILELOCK, timeout=SINGLETON_TIMEOUT)
     except:
         raise SingletonError("Only one application instance shall be alive at a time.")

@@ -12,11 +12,20 @@ from config import (
     CLIPBOARD_EVENT_ENDPOINT,
     CLIPBOARD_EVENT_PORT,
     APP_CONFIG,
+    APP_CONFIG_PATH,
 )
+from edit import open_file_in_editor
 from dataclass import ClipboardEvent
 import http, time
 
 session = requests.Session()
+
+APP_NAME = "复制搜索"
+
+BUTTON_SEARCH = "搜索"
+BUTTON_REFRESH = "刷新"
+BUTTON_CONFIG = "配置"
+REFRESH_DONE_INFO = "索引刷新完成"
 
 """
 Layout:
@@ -52,7 +61,7 @@ class AppFrame(tk.Tk):
     def __init__(self):
         super().__init__()
         self.last_query = ""
-        self.title("Search App")
+        self.title(APP_NAME)
         self.geometry("600x400")
         self.configure(bg="white")
         self.resizable(False, False)
@@ -81,16 +90,25 @@ class AppFrame(tk.Tk):
         )
 
         self.refresh_button = tk.Button(
-            self.button_frame, text="Refresh", command=self.on_refresh
+            self.button_frame, text=BUTTON_REFRESH, command=self.on_refresh
         )
         self.refresh_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         # Submit Button
         self.submit_button = tk.Button(
-            self.button_frame, text="Search", command=self.on_submit
+            self.button_frame, text=BUTTON_SEARCH, command=self.on_submit
         )
         self.submit_button.pack(side=tk.RIGHT, padx=5, pady=5)
+
+        self.config_button = tk.Button(
+            self.button_frame, text=BUTTON_CONFIG, command=self.on_config
+        )
+        self.config_button.pack(side=tk.RIGHT, padx=5, pady=5)
+
         self.is_running = True
+
+    def on_config(self):
+        open_file_in_editor(APP_CONFIG_PATH)
 
     def perform_search(self, query: str):
         if query:  # non-empty query
@@ -114,7 +132,7 @@ class AppFrame(tk.Tk):
     def on_refresh(self):
         # Placeholder for refresh button action
         refresh_index()
-        messagebox.showinfo("Refresh", "Index refreshed.", parent=self)
+        messagebox.showinfo(BUTTON_REFRESH, REFRESH_DONE_INFO, parent=self)
 
 
 def monitor_clipboard_and_perform_search(frame: AppFrame):
@@ -141,7 +159,9 @@ def monitor_clipboard_and_perform_search(frame: AppFrame):
             if resp.status_code == http.HTTPStatus.BAD_GATEWAY:
                 print("[ui]", "clipboard server is not running")
             else:
-                print("[ui]", "abnormal clipboard server status code:", resp.status_code)
+                print(
+                    "[ui]", "abnormal clipboard server status code:", resp.status_code
+                )
             print("[ui]", "abnormal request at:", url)
 
     main_loop()
@@ -160,5 +180,5 @@ def ui_main():
     frame.mainloop()
 
 
-if __name__ == "__main__":
-    ui_main()
+# if __name__ == "__main__":
+#     ui_main()

@@ -3,3 +3,6 @@
 !*.py
 !*.sh
 !*.cmd
+build
+dist
+__pycache__

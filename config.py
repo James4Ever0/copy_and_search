@@ -30,10 +30,12 @@ def make_sure_directory_exists(directory: str):
     else:
         os.mkdir(directory)
 
+
 APP_CONFIG_PATH = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "config.json")
 APP_DEFAULT_INDEX_DIRECTORY = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "index")
 APP_DEFAULT_DOCUMENT_DIRECTORY = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "document")
 APP_DEFAULT_EVENT_SOURCES = ["keyboard"]
+APP_DEFAULT_SEARCH_LIMIT = 10
 
 make_sure_directory_exists(APP_DEFAULT_CONFIG_BASEPATH)
 make_sure_directory_exists(APP_DEFAULT_DOCUMENT_DIRECTORY)
@@ -42,6 +44,7 @@ APP_DEFAULT_CONFIG = AppConfig(
     index_directory=APP_DEFAULT_INDEX_DIRECTORY,
     document_directory=APP_DEFAULT_DOCUMENT_DIRECTORY,
     event_sources=APP_DEFAULT_EVENT_SOURCES,
+    search_limit=APP_DEFAULT_SEARCH_LIMIT,
 )
 
 if os.path.exists(APP_CONFIG_PATH):
@@ -55,7 +58,7 @@ else:
 SINGLETON_FILELOCK = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "singleton.lock")
 SINGLETON_TIMEOUT = 2
 
-SEARCH_LIMIT = 10
+SEARCH_LIMIT = APP_CONFIG['search_limit']
 
-MONITOR_CLIPBOARD_PERIOD=1
-MONITOR_CLIPBOARD_TIMEOUT=2
+MONITOR_CLIPBOARD_PERIOD = 1
+MONITOR_CLIPBOARD_TIMEOUT = 2

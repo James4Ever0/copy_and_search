@@ -42,6 +42,7 @@ def remove_and_create_index():
 def search_by_query(query: str):
     global SEARCH_INDEX
     ret = []
+    print("[search]", 'received query:', query)
     with SEARCH_INDEX.searcher() as searcher:
         # 单关键词搜索
         # parser = QueryParser("title", ix.schema).parse("手册")
@@ -64,6 +65,7 @@ def search_by_query(query: str):
             # Get the 'content' field as a string
             content_str = i["content"]
             ret.append(content_str)
+    print('[search]', "matching items:", *ret)
     return ret
 
 

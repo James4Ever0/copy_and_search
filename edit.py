@@ -13,3 +13,14 @@ def open_file_in_editor(file_path):
         subprocess.call([*opener, file_path])
     else:
         print("Unsupported OS")
+
+
+def open_directory_in_explorer(directory_path):
+    if sys.platform.startswith("win"):  # Windows
+        subprocess.Popen(f'explorer "{os.path.realpath(directory_path)}"')
+    elif sys.platform.startswith("darwin"):  # macOS
+        subprocess.Popen(['open', directory_path])
+    elif sys.platform.startswith("linux"):  # Linux
+        subprocess.Popen(['xdg-open', directory_path])
+    else:
+        print("Unsupported OS")

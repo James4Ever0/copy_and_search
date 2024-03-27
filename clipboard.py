@@ -1,4 +1,6 @@
 import pyperclip
+pyperclip.set_clipboard('pbcopy') # override
+
 import fastapi
 import time
 import beartype
@@ -62,6 +64,8 @@ def clipboard_listener():
         time.sleep(CLIPBOARD_UPDATE_INTERVAL)
         try:
             update_clipboard_event()
+        except ConnectionError:
+            print("Keyboard listener is not running.")
         except SystemExit:
             print("Exit because of SystemExit")
             break

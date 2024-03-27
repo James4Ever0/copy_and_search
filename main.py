@@ -19,8 +19,9 @@ def start_listeners():
     # start_process(run_clipboard_listener, "clipboard_listener")
 
 def start_thread(runner):
-    threading.Thread(target=runner, daemon=True).start()
+    thread = threading.Thread(target=runner, daemon=True).start()
     time.sleep(START_PROCESS_INTERVAL)
+    return thread
 
 # def run_python_script_as_subprocess(script_path: str):
 #     subprocess.Popen([sys.executable, script_path]) # not applicable in this case.
@@ -54,16 +55,17 @@ def cleanup():
     client_kill_server(KEYBOARD_EVENT_PORT)
 
 def main():
+    start_listeners()
     with ensure_singleton():
-        start_listeners()
-        
         print("[main] ui started.")
         ui.ui_main()
+        # start_process(ui.ui_main, 'ui_process').join()
+        # start_thread(ui.ui_main).join()
         
         print("[main] cleaning up.")
         cleanup()
         print("[main] exiting.")
-        os.kill(os.getpid(), signal.SIGTERM)
+    os.kill(os.getpid(), signal.SIGTERM)
 
 if __name__ == "__main__":
     main()

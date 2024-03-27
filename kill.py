@@ -5,12 +5,16 @@ import uvicorn
 import time
 import http
 import os,signal
-
+# from urllib3.exceptions import NewConnectionError
+from requests.exceptions import ConnectionError
 def client_kill_server(port:int):
     kill_url = f"http://{HOST_ADDRESS}:{port}{KILL_ENDPOINT}"
-    response = requests.get(kill_url, timeout=KILL_TIMEOUT)
-    return response.status_code
-    
+    try:
+        response = requests.get(kill_url, timeout=KILL_TIMEOUT)
+        return response.status_code
+    except ConnectionError:
+        return http.HTTPStatus.BAD_GATEWAY
+
 def client_ensure_kill_server(port:int):
     while True:
         status_code = client_kill_server(port)

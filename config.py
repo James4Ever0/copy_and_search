@@ -47,18 +47,32 @@ APP_DEFAULT_CONFIG = AppConfig(
     search_limit=APP_DEFAULT_SEARCH_LIMIT,
 )
 
-if os.path.exists(APP_CONFIG_PATH):
-    with open(APP_CONFIG_PATH, "r") as f:
+
+def read_config():
+    with open(APP_CONFIG_PATH, "r") as f:  # may fail.
         APP_CONFIG = AppConfig(**json.load(f))
-else:
+    return APP_CONFIG
+
+
+def write_default_config():
     with open(APP_CONFIG_PATH, "w+") as f:
         json.dump(APP_DEFAULT_CONFIG, f)
     APP_CONFIG = APP_DEFAULT_CONFIG
+    return APP_CONFIG
+
+
+if os.path.exists(APP_CONFIG_PATH):
+    try:
+        APP_CONFIG = read_config()
+    except:
+        APP_CONFIG = write_default_config()
+else:
+    APP_CONFIG = write_default_config()
 
 SINGLETON_FILELOCK = os.path.join(APP_DEFAULT_CONFIG_BASEPATH, "singleton.lock")
 SINGLETON_TIMEOUT = 2
 
-SEARCH_LIMIT = APP_CONFIG['search_limit']
+SEARCH_LIMIT = APP_CONFIG["search_limit"]
 
 MONITOR_CLIPBOARD_PERIOD = 1
 MONITOR_CLIPBOARD_TIMEOUT = 2

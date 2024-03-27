@@ -3,8 +3,11 @@ from tkinter import messagebox
 from clipboard import copy_to_clipboard
 from search import refresh_index, search_by_query
 from typing import List, Callable
+from types import SimpleNamespace
 import requests
 import threading
+from requests.exceptions import ConnectionError
+
 from config import (
     MONITOR_CLIPBOARD_PERIOD,
     MONITOR_CLIPBOARD_TIMEOUT,
@@ -12,9 +15,9 @@ from config import (
     CLIPBOARD_EVENT_ENDPOINT,
     CLIPBOARD_EVENT_PORT,
     APP_CONFIG,
-    APP_CONFIG_PATH,
+    # APP_CONFIG_PATH,
 )
-from edit import open_file_in_editor
+from edit import open_directory_in_explorer  # open_file_in_editor
 from dataclass import ClipboardEvent
 import http, time
 
@@ -54,8 +57,10 @@ class AppFrame(tk.Tk):
         self.search_list.delete(0, tk.END)
 
     def update_search_list_by_items(self, items: List[str]):
+        print("[ui]", "clearing item list")
         self.clear_search_list()
         for item in items:
+            print("[ui]", "inserting item:", item)
             self.search_list.insert(tk.END, item)
 
     def __init__(self):
@@ -108,7 +113,8 @@ class AppFrame(tk.Tk):
         self.is_running = True
 
     def on_config(self):
-        open_file_in_editor(APP_CONFIG_PATH)
+        open_directory_in_explorer(APP_CONFIG["document_directory"])
+        # open_file_in_editor(APP_CONFIG_PATH)
 
     def perform_search(self, query: str):
         if query:  # non-empty query
@@ -146,7 +152,11 @@ def monitor_clipboard_and_perform_search(frame: AppFrame):
             inner_loop(url)
 
     def inner_loop(url: str):
-        resp = session.get(url, timeout=MONITOR_CLIPBOARD_TIMEOUT)
+        try:
+            resp = session.get(url, timeout=MONITOR_CLIPBOARD_TIMEOUT)
+        except ConnectionError:
+            resp = SimpleNamespace()
+            resp.status_code = http.HTTPStatus.BAD_GATEWAY
         if resp.status_code == http.HTTPStatus.OK:
             data = resp.json()
             data = ClipboardEvent(**data)
